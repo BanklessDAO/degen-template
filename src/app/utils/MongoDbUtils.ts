@@ -13,10 +13,7 @@ const MongoDbUtils = {
 		if (db == null) {
 			Log.debug(`Connecting to ${database} for first time!`);
 			const options: MongoClientOptions = {
-				writeConcern: {
-					w: 'majority',
-				},
-				useUnifiedTopology: true,
+				w: 'majority',
 			};
 			const mongoClient = await MongoClient.connect(constants.MONGODB_URI_PARTIAL + database, options);
 			MongoDbUtils.state.clientMap.set(database, mongoClient);
