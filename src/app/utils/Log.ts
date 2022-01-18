@@ -1,92 +1,106 @@
 import logdna, { Logger, LogOptions } from '@logdna/logger';
+import apiKeys from '../service/constants/apiKeys';
 import { CommandContext } from 'slash-create';
+import * as Sentry from '@sentry/node';
 
-class Log {
-	static logger: Logger;
-	
-	constructor() {
-		try {
-			Log.logger = logdna.createLogger(process.env.LOGDNA_TOKEN, {
-				app: process.env.LOGDNA_APP_NAME,
-				level: process.env.LOGDNA_DEFAULT_LEVEL,
-			});
-		} catch (e) {
-			// eslint-disable-next-line no-console
-			console.log('Please setup LogDNA token.');
-			// eslint-disable-next-line no-console
-			console.log(e);
-		}
+let logger: Logger;
+
+try {
+	logger = logdna.createLogger(apiKeys.logDNAToken, {
+		app: apiKeys.logDNAAppName,
+		level: apiKeys.logDNADefault,
+	});
+	if (process.env.NODE_ENV != 'production' || !logger.info) {
+		// eslint-disable-next-line no-console
+		console.log('Logger initialized!');
+	} else {
+		logger.log('Logger initialized!');
 	}
+} catch (e) {
+	// eslint-disable-next-line no-console
+	console.log('Please setup LogDNA token.');
+	// eslint-disable-next-line no-console
+	console.log(e);
+	throw new Error();
+}
+
+const Log = {
 	
-	static info(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV === 'development') {
+	info(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+		if (process.env.NODE_ENV != 'production' || !logger.info) {
 			// eslint-disable-next-line no-console
 			console.log(statement);
+		} else {
+			logger.info(statement, options);
 		}
-		this.logger.info(statement, options);
-	}
-
-	static warn(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV === 'development') {
+	},
+	
+	warn(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+		if (process.env.NODE_ENV != 'production' || !logger.warn) {
 			// eslint-disable-next-line no-console
 			console.log(statement);
+		} else {
+			logger.warn(statement, options);
 		}
-		this.logger.warn(statement, options);
-	}
-
-	static debug(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV === 'development' && process.env.LOGDNA_DEFAULT_LEVEL == 'debug') {
+	},
+	
+	debug(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+		if (process.env.NODE_ENV != 'production' || !logger.debug) {
 			// eslint-disable-next-line no-console
 			console.debug(statement);
+		} else {
+			logger.debug(statement, options);
 		}
-		this.logger.debug(statement, options);
-	}
-
-	static error(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV === 'development') {
+	},
+	
+	error(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+		if (process.env.NODE_ENV != 'production' || !logger.error) {
 			// eslint-disable-next-line no-console
 			console.error(statement);
+		} else {
+			logger.error(statement, options);
 		}
-		this.logger.error(statement, options);
-	}
-
-	static fatal(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV === 'development') {
+	},
+	
+	fatal(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+		if (process.env.NODE_ENV != 'production' || !logger.fatal) {
 			// eslint-disable-next-line no-console
 			console.error(statement);
+		} else {
+			logger.fatal(statement, options);
 		}
-		this.logger.fatal(statement, options);
-	}
-
-	static trace(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV === 'development') {
+	},
+	
+	trace(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+		if (process.env.NODE_ENV != 'production' || !logger.trace) {
+			// eslint-disable-next-line no-console
+			console.log(statement);
+		} else {
+			logger.trace(statement, options);
+		}
+	},
+	
+	log(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
+		if (process.env.NODE_ENV != 'production') {
 			// eslint-disable-next-line no-console
 			console.log(statement);
 		}
-		this.logger.trace(statement, options);
-	}
-
-	static log(statement: string | any, options?: Omit<LogOptions, 'level'>): void {
-		if (process.env.NODE_ENV === 'development') {
-			// eslint-disable-next-line no-console
-			console.log(statement);
-		}
-		this.logger.log(statement, options);
-	}
+		logger.log(statement, options);
+	},
 	
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-	static addMetaProperty(key: string, value: any): void {
-		this.logger.addMetaProperty(key, value);
-	}
+	addMetaProperty(key: string, value: any): void {
+		logger.addMetaProperty(key, value);
+	},
 	
-	static removeMetaProperty(key: string): void {
-		this.logger.removeMetaProperty(key);
-	}
+	removeMetaProperty(key: string): void {
+		logger.removeMetaProperty(key);
+	},
 	
-	static flush(): void {
-		this.logger.flush();
-	}
-}
+	flush(): void {
+		logger.flush();
+	},
+};
 
 export const LogUtils = {
 	logCommandStart(ctx: CommandContext): void {
@@ -113,16 +127,29 @@ export const LogUtils = {
 		});
 	},
 	
-	logError(message: string, error: Error, guildId?: string): void {
-		Log.error(message, {
-			indexMeta: true,
-			meta: {
-				name: error.name,
-				message: error.message,
-				stack: error.stack,
-				guildId: guildId,
-			},
-		});
+	logError(message: string, error: Error | any, guildId?: string): void {
+		try {
+			if (error != null && error instanceof Error) {
+				Sentry.captureException(error, {
+					tags: {
+						guildId: guildId,
+					},
+				});
+				Log.error(message, {
+					indexMeta: true,
+					meta: {
+						name: error?.name,
+						message: error?.message,
+						stack: error?.stack,
+						guildId: guildId,
+					},
+				});
+			} else {
+				Log.error(message);
+			}
+		} catch (e) {
+			Log.warn(message);
+		}
 	},
 };
 
