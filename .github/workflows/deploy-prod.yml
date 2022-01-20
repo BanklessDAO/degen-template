@@ -2,7 +2,7 @@ name: Deploy to Production Environment
 on:
   push:
     branches:
-      - 'DEGEN'
+      - 'main'
 jobs:
   deploy-prod:
     environment:
@@ -39,3 +39,18 @@ jobs:
           HD_MONGODB_CLUSTER: ${{secrets.PROD_MONGODB_CLUSTER}}
           HD_NOTION_TOKEN: ${{secrets.PROD_NOTION_TOKEN}}
           HD_LOGDNA_TOKEN: ${{secrets.PROD_LOGDNA_TOKEN}}
+          HD_SENTRY_IO_DSN: ${{secrets.PROD_SENTRY_IO_DSN}}
+      - name: Get current package version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.1.0
+      - name: Sentry Release
+        uses: getsentry/action-release@v1.1.6
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          sourcemaps: './dist'
+        with:
+          environment: 'production'
+          version: 'project-name@${{ steps.package-version.outputs.current-version }}'
+          sourcemaps: './dist'
