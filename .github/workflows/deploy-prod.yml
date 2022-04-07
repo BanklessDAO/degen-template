@@ -16,6 +16,8 @@ jobs:
           node-version: '16.10.0'
       - name: Setup PNPM
         uses: pnpm/action-setup@v2.2.1
+        with:
+          version: 6.x
       - name: Install dependencies
         run: pnpm install
       - name: Lint Code
