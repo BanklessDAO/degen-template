@@ -1,6 +1,6 @@
 describe('Log Test', () => {
 	
-	it('test example', () => {
-		expect(true).toBe(true);
-	});
+  it('test example', () => {
+    expect(true).toBe(true);
+  });
 });
