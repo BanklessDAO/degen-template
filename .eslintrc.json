@@ -1,0 +1,89 @@
+{
+  "env": {
+    "commonjs": true,
+    "es2021": true,
+    "node": true,
+    "browser": false
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "ignorePatterns": [
+    "dist/**/*"
+  ],
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "rules": {
+    "@typescript-eslint/no-var-requires": 0,
+    "brace-style": ["error", "1tbs", {
+      "allowSingleLine": true
+    }],
+    "comma-dangle": ["error", "always-multiline"],
+    "comma-spacing": "error",
+    "comma-style": "error",
+    "curly": ["error", "multi-line", "consistent"],
+    "dot-location": ["error", "property"],
+    "indent": [
+      "error",
+      2,
+      {
+        "MemberExpression": 1,
+        "ignoredNodes": [
+          "FunctionExpression > .params[decorators.length > 0]",
+          "FunctionExpression > .params > :matches(Decorator, :not(:first-child))",
+          "ClassBody.body > PropertyDefinition[decorators.length > 0] > .key"
+        ]
+      }
+    ],
+    "max-nested-callbacks": [
+      "error", {
+        "max": 4
+      }
+    ],
+    "max-statements-per-line": ["error", { "max": 2 }],
+    "no-console": "error",
+    "no-empty-function": "error",
+    "no-floating-decimal": "error",
+    "no-inline-comments": "error",
+    "no-multi-spaces": "error",
+    "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1, "maxBOF": 0 }],
+    "no-shadow": ["error", { "allow": ["err", "resolve", "reject"] }],
+    "no-trailing-spaces": ["error", { "skipBlankLines": true, "ignoreComments": true }],
+    "no-var": "error",
+    "object-curly-spacing": ["error", "always"],
+    "prefer-const": "error",
+    "space-before-blocks": "error",
+    "space-before-function-paren": [
+      "error",
+      {
+        "anonymous": "never",
+        "named": "never",
+        "asyncArrow": "always"
+      }
+    ],
+    "space-in-parens": "error",
+    "space-infix-ops": "error",
+    "space-unary-ops": "error",
+    "spaced-comment": "error",
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ],
+    "@typescript-eslint/no-explicit-any": 0,
+    "eol-last": ["error", "always"]
+  }
+}

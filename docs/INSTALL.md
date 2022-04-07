@@ -8,7 +8,7 @@ These tools can make development quick and are recommended:
 -   [git CLI](https://git-scm.com) - version control system
 -   [nodejs v14.17.0](https://nodejs.org/en/) - js runtime built on chrome's v8 engine
 -   [nvm](https://github.com/nvm-sh/nvm) - easily change node versions
--   [yarn v1.x](https://yarnpkg.com/) - dependency management system
+-   [pnpm](https://pnpm.io/) - dependency management system
 -   [Docker](https://docs.docker.com/desktop/) - for local development
 -   [iterm2](https://iterm2.com/) - enhanced terminal for macOS
 -   [discord](https://discord.com/) - popular chat application used for gaming and organized communities
@@ -84,7 +84,7 @@ If using Docker, a local instance of mongo is included when using `docker-compos
 
 If not using docker:
 ```bash
-yarn start
+pnpm start
 ```
 
 If using docker:

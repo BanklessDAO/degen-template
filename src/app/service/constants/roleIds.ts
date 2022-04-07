@@ -1,4 +1,4 @@
 // TODO: add role ID
 export default Object.freeze({
-	roleExample: 'add-role-id-here',
+  roleExample: 'add-role-id-here',
 });
