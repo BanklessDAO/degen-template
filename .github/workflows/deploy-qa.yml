@@ -3,6 +3,7 @@ on:
     push:
         branches:
           - 'develop'
+          - 'hotfix/**'
     pull_request:
         branches:
           - 'release/**'
@@ -10,28 +11,30 @@ jobs:
     deploy-qa:
         environment:
             name: preview
-            url: url-logdna-here
+            url: https://app.logdna.com/273e532689/logs/view?apps=[app-name-here]
         runs-on: ubuntu-20.04
         steps:
             - uses: actions/checkout@v2
             - uses: actions/setup-node@v2
               with:
                   node-version: '16.10.0'
+            - name: Setup PNPM
+              uses: pnpm/action-setup@v2.2.1
             - name: Install dependencies
-              run: yarn install
+              run: pnpm install
             - name: Lint Code
-              run: yarn lint
+              run: pnpm lint
             - name: Build and Compile Typescript
-              run: yarn build
+              run: pnpm build
             - name: Run test cases
-              run: yarn test --watchAll=false
+              run: pnpm test
             - name: Deploy to Heroku Shared Test Environment
               uses: AkhileshNS/heroku-deploy@v3.12.12
               with:
                   heroku_api_key: ${{secrets.QA_HEROKU_API_KEY}}
-                  heroku_app_name: 'heroku-app-name-here'
-                  heroku_email: 'email-here'
-                  procfile: 'worker: yarn qa'
+                  heroku_app_name: 'heroku-app-name'
+                  heroku_email: 'test@email.com'
+                  procfile: 'worker: npm run start:qa'
               env:
                   HD_DISCORD_BOT_TOKEN: ${{secrets.QA_DISCORD_TOKEN}}
                   HD_DISCORD_BOT_PUBLIC_KEY: ${{secrets.QA_BOT_PUBLIC_KEY}}
@@ -40,8 +43,8 @@ jobs:
                   HD_MONGODB_USERNAME: ${{secrets.QA_MONGODB_USERNAME}}
                   HD_MONGODB_PASS: ${{secrets.QA_MONGODB_PASS}}
                   HD_MONGODB_CLUSTER: ${{secrets.QA_MONGODB_CLUSTER}}
-                  HD_NOTION_TOKEN: ${{secrets.QA_NOTION_TOKEN}}
-                  HD_LOGDNA_TOKEN: ${{secrets.QA_LOGDNA_TOKEN}}
+                  HD_LOG_DNA_TOKEN: ${{secrets.QA_LOGDNA_TOKEN}}
+                  HD_SENTRY_IO_DSN: ${{secrets.QA_SENTRY_IO_DSN}}
             - name: Get current package version
               id: package-version
               uses: martinbeentjes/npm-get-version-action@v1.1.0
@@ -53,5 +56,5 @@ jobs:
                 SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
               with:
                 environment: 'qa'
-                version: 'project-name@${{ steps.package-version.outputs.current-version }}'
+                version: '[app-name]@${{ steps.package-version.outputs.current-version }}'
                 sourcemaps: './dist'
